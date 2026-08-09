@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Free Macro Calculator | Wiktoria Natanek Coaching</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:    #c0392b;
+      --red-bg: #fff5f5;
+      --dark:   #1a1a1a;
+      --muted:  #666;
+      --border: #e5e5e5;
+      --green:  #1a7a4a;
+      --green-bg: #f0faf5;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 16px;
+      line-height: 1.75;
+      color: var(--dark);
+      background: #f7f7f7;
+    }
+
+    .wrapper {
+      max-width: 680px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 48px 48px 64px;
+    }
+
+    @media (max-width: 640px) {
+      .wrapper { padding: 28px 20px 48px; }
+    }
+
+    /* ── Header ── */
+    .hero {
+      border-bottom: 3px solid var(--red);
+      padding-bottom: 24px;
+      margin-bottom: 36px;
+    }
+
+    .hero .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 8px;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--dark);
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      font-size: 15px;
+      color: var(--muted);
+    }
+
+    /* ── Form ── */
+    .form-section {
+      margin-bottom: 32px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .field-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .field-group.full {
+      grid-template-columns: 1fr;
+    }
+
+    @media (max-width: 480px) {
+      .field-group { grid-template-columns: 1fr; }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--dark);
+      background: #fff;
+      transition: border-color 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+
+    input[type="number"]:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--red);
+    }
+
+    .unit-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .unit-btn {
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      background: #fff;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .unit-btn.active {
+      border-color: var(--red);
+      background: var(--red-bg);
+      color: var(--red);
+    }
+
+    .input-with-unit {
+      position: relative;
+    }
+
+    .input-with-unit input {
+      padding-right: 48px;
+    }
+
+    .input-unit {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── Button ── */
+    .calc-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--red);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    .calc-btn:hover { background: #a93226; }
+    .calc-btn:active { transform: scale(0.99); }
+
+    /* ── Results ── */
+    #results {
+      display: none;
+      margin-top: 36px;
+    }
+
+    .results-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .results-header .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 6px;
+    }
+
+    .results-header h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(22px, 4vw, 30px);
+      color: var(--dark);
+      line-height: 1.3;
+    }
+
+    .calorie-box {
+      background: var(--red-bg);
+      border: 2px solid var(--red);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .calorie-box .label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 4px;
+    }
+
+    .calorie-box .number {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 52px;
+      font-weight: 700;
+      color: var(--red);
+      line-height: 1;
+    }
+
+    .calorie-box .sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .macros-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 400px) {
+      .macros-grid { grid-template-columns: 1fr; }
+    }
+
+    .macro-card {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 12px;
+      text-align: center;
+    }
+
+    .macro-card .macro-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .macro-card .macro-num {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--dark);
+      line-height: 1.1;
+    }
+
+    .macro-card .macro-unit {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .macro-card.protein { border-color: #c0392b33; background: #fff9f9; }
+    .macro-card.carbs   { border-color: #e67e2233; background: #fffbf5; }
+    .macro-card.fat     { border-color: #27ae6033; background: #f5faf7; }
+
+    .macro-card.protein .macro-num { color: var(--red); }
+    .macro-card.carbs   .macro-num { color: #c0762b; }
+    .macro-card.fat     .macro-num { color: var(--green); }
+
+    /* ── Breakdown bar ── */
+    .macro-bar-wrap {
+      margin-bottom: 24px;
+    }
+
+    .macro-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .macro-bar {
+      height: 10px;
+      border-radius: 99px;
+      overflow: hidden;
+      display: flex;
+      background: var(--border);
+    }
+
+    .macro-bar-seg {
+      height: 100%;
+      transition: width 0.6s ease;
+    }
+
+    .seg-protein { background: var(--red); }
+    .seg-carbs   { background: #e67e22; }
+    .seg-fat     { background: var(--green); }
+
+    /* ── Note ── */
+    .note-box {
+      background: var(--green-bg);
+      border-left: 3px solid var(--green);
+      border-radius: 0 6px 6px 0;
+      padding: 14px 16px;
+      font-size: 14px;
+      color: #1a4a2e;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    /* ── CTA ── */
+    .cta-box {
+      border: 2px solid var(--red);
+      border-radius: 12px;
+      padding: 28px 24px;
+      text-align: center;
+    }
+
+    .cta-box .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 8px;
+    }
+
+    .cta-box h3 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 22px;
+      color: var(--dark);
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .cta-box p {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 18px;
+      line-height: 1.6;
+    }
+
+    .cta-link {
+      display: inline-block;
+      padding: 12px 28px;
+      background: var(--red);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+
+    .cta-link:hover { background: #a93226; }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 48px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="hero">
+    <div class="eyebrow">Free Tool — Wiktoria Natanek Coaching</div>
+    <h1>Your Free Macro<br>Breakdown Calculator</h1>
+    <p>Fill in your details below to get your personalised calorie target and daily macros in 30 seconds.</p>
+  </div>
+
+  <!-- Form -->
+  <div class="form-section">
+    <div class="section-label">Your Details</div>
+
+    <div style="margin-bottom: 16px;">
+      <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">Units</div>
+      <div class="unit-toggle">
+        <button class="unit-btn active" id="btn-metric" onclick="setUnits('metric')">Metric (kg / cm)</button>
+        <button class="unit-btn" id="btn-imperial" onclick="setUnits('imperial')">Imperial (lbs / ft)</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="field">
+        <label for="gender">Sex</label>
+        <select id="gender">
+          <option value="female">Female</option>
+          <option value="male">Male</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="age">Age</label>
+        <div class="input-with-unit">
+          <input type="number" id="age" placeholder="28" min="16" max="80" />
+          <span class="input-unit">yrs</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group" id="metric-fields">
+      <div class="field">
+        <label for="weight-kg">Weight</label>
+        <div class="input-with-unit">
+          <input type="number" id="weight-kg" placeholder="65" min="30" max="300" />
+          <span class="input-unit">kg</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="height-cm">Height</label>
+        <div class="input-with-unit">
+          <input type="number" id="height-cm" placeholder="165" min="100" max="250" />
+          <span class="input-unit">cm</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group" id="imperial-fields" style="display: none;">
+      <div class="field">
+        <label for="weight-lbs">Weight</label>
+        <div class="input-with-unit">
+          <input type="number" id="weight-lbs" placeholder="143" min="66" max="660" />
+          <span class="input-unit">lbs</span>
+        </div>
+      </div>
+      <div class="field" style="display: flex; flex-direction: column; gap: 5px;">
+        <label>Height</label>
+        <div style="display: flex; gap: 8px;">
+          <div class="input-with-unit" style="flex: 1;">
+            <input type="number" id="height-ft" placeholder="5" min="3" max="8" />
+            <span class="input-unit">ft</span>
+          </div>
+          <div class="input-with-unit" style="flex: 1;">
+            <input type="number" id="height-in" placeholder="5" min="0" max="11" />
+            <span class="input-unit">in</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="section-label">Activity Level</div>
+    <div class="field-group full">
+      <div class="field">
+        <select id="activity">
+          <option value="1.2">Sedentary — desk job, little/no exercise</option>
+          <option value="1.375">Lightly active — 1-3 workouts per week</option>
+          <option value="1.55" selected>Moderately active — 3-5 workouts per week</option>
+          <option value="1.725">Very active — hard exercise 6-7 days/week</option>
+          <option value="1.9">Extra active — physical job + daily training</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="section-label">Your Goal</div>
+    <div class="field-group full">
+      <div class="field">
+        <select id="goal">
+          <option value="cut">Fat loss — I want to lose body fat</option>
+          <option value="maintain">Maintenance — I want to hold my current weight</option>
+          <option value="build">Muscle gain — I want to build lean muscle</option>
+        </select>
+        <div class="hint">Your macros are tailored to your goal.</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="calc-btn" onclick="calculate()">Calculate My Macros</button>
+
+  <!-- Results -->
+  <div id="results">
+    <div style="border-top: 1px solid var(--border); margin-top: 36px; padding-top: 36px;">
+
+      <div class="results-header">
+        <div class="eyebrow">Your personalised breakdown</div>
+        <h2 id="results-headline">Here are your daily targets</h2>
+      </div>
+
+      <div class="calorie-box">
+        <div class="label">Daily Calorie Target</div>
+        <div class="number" id="result-calories">—</div>
+        <div class="sub">kcal per day</div>
+      </div>
+
+      <div class="macros-grid">
+        <div class="macro-card protein">
+          <div class="macro-label">Protein</div>
+          <div class="macro-num" id="result-protein">—</div>
+          <div class="macro-unit">g / day</div>
+        </div>
+        <div class="macro-card carbs">
+          <div class="macro-label">Carbs</div>
+          <div class="macro-num" id="result-carbs">—</div>
+          <div class="macro-unit">g / day</div>
+        </div>
+        <div class="macro-card fat">
+          <div class="macro-label">Fat</div>
+          <div class="macro-num" id="result-fat">—</div>
+          <div class="macro-unit">g / day</div>
+        </div>
+      </div>
+
+      <div class="macro-bar-wrap">
+        <div class="macro-bar-label">
+          <span id="bar-protein-pct" style="color: var(--red);">Protein</span>
+          <span id="bar-carbs-pct" style="color: #c0762b;">Carbs</span>
+          <span id="bar-fat-pct" style="color: var(--green);">Fat</span>
+        </div>
+        <div class="macro-bar">
+          <div class="macro-bar-seg seg-protein" id="bar-protein" style="width: 0%"></div>
+          <div class="macro-bar-seg seg-carbs"   id="bar-carbs"   style="width: 0%"></div>
+          <div class="macro-bar-seg seg-fat"     id="bar-fat"     style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="note-box" id="result-note"></div>
+
+      <div class="cta-box">
+        <div class="eyebrow">Want faster results?</div>
+        <h3>Get a full custom plan — not just numbers</h3>
+        <p>Macros are a starting point. I'll build you a complete nutrition and training plan around your lifestyle, food preferences, and schedule — so it actually sticks.</p>
+        <a class="cta-link" href="https://instagram.com/wiktoria.natanek" target="_blank">Book a Free Discovery Call</a>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    Calories calculated using the Mifflin-St Jeor equation &mdash; the gold standard for TDEE estimation.<br>
+    These numbers are a starting point. Individual needs vary. Results are not medical advice.
+  </div>
+
+</div>
+
+<script>
+  let currentUnits = 'metric';
+
+  function setUnits(u) {
+    currentUnits = u;
+    document.getElementById('metric-fields').style.display   = u === 'metric'   ? '' : 'none';
+    document.getElementById('imperial-fields').style.display = u === 'imperial' ? '' : 'none';
+    document.getElementById('btn-metric').classList.toggle('active',   u === 'metric');
+    document.getElementById('btn-imperial').classList.toggle('active', u === 'imperial');
+  }
+
+  function getWeightKg() {
+    if (currentUnits === 'metric') {
+      return parseFloat(document.getElementById('weight-kg').value);
+    }
+    const lbs = parseFloat(document.getElementById('weight-lbs').value);
+    return lbs / 2.2046;
+  }
+
+  function getHeightCm() {
+    if (currentUnits === 'metric') {
+      return parseFloat(document.getElementById('height-cm').value);
+    }
+    const ft = parseFloat(document.getElementById('height-ft').value) || 0;
+    const inches = parseFloat(document.getElementById('height-in').value) || 0;
+    return (ft * 12 + inches) * 2.54;
+  }
+
+  function calculate() {
+    const gender   = document.getElementById('gender').value;
+    const age      = parseFloat(document.getElementById('age').value);
+    const activity = parseFloat(document.getElementById('activity').value);
+    const goal     = document.getElementById('goal').value;
+    const weightKg = getWeightKg();
+    const heightCm = getHeightCm();
+
+    // Validate
+    if (!age || !weightKg || !heightCm || isNaN(age) || isNaN(weightKg) || isNaN(heightCm)) {
+      alert('Please fill in all fields before calculating.');
+      return;
+    }
+    if (age < 16 || age > 80)     { alert('Please enter an age between 16 and 80.'); return; }
+    if (weightKg < 30 || weightKg > 300) { alert('Please enter a valid weight.'); return; }
+    if (heightCm < 100 || heightCm > 250) { alert('Please enter a valid height.'); return; }
+
+    // BMR — Mifflin-St Jeor
+    let bmr;
+    if (gender === 'female') {
+      bmr = 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
+    } else {
+      bmr = 10 * weightKg + 6.25 * heightCm - 5 * age + 5;
+    }
+
+    // TDEE
+    let tdee = bmr * activity;
+
+    // Goal adjustment & macro split
+    let calories, proteinG, fatG, carbsG;
+    let note = '';
+    let headline = '';
+
+    if (goal === 'cut') {
+      calories  = Math.round(tdee - 400);
+      proteinG  = Math.round(weightKg * 2.2);  // 2.2g/kg — high protein for fat loss
+      fatG      = Math.round(weightKg * 0.9);   // ~1g/kg
+      carbsG    = Math.round((calories - proteinG * 4 - fatG * 9) / 4);
+      if (carbsG < 50) carbsG = 50; // floor
+      note = 'You\'re in a moderate calorie deficit of ~400 kcal. Protein is set high to protect muscle while you lose fat. Aim to lose 0.5–1% of bodyweight per week — if progress stalls after 2 weeks, reduce calories by another 100–150 kcal.';
+      headline = 'Your fat loss targets';
+    } else if (goal === 'maintain') {
+      calories  = Math.round(tdee);
+      proteinG  = Math.round(weightKg * 1.8);
+      fatG      = Math.round(weightKg * 1.0);
+      carbsG    = Math.round((calories - proteinG * 4 - fatG * 9) / 4);
+      if (carbsG < 50) carbsG = 50;
+      note = 'Maintenance calories keep your weight stable while supporting energy, performance, and recovery. These are great targets if you\'re happy with your current weight and want to focus on body composition or performance.';
+      headline = 'Your maintenance targets';
+    } else {
+      calories  = Math.round(tdee + 250);
+      proteinG  = Math.round(weightKg * 2.0);
+      fatG      = Math.round(weightKg * 1.0);
+      carbsG    = Math.round((calories - proteinG * 4 - fatG * 9) / 4);
+      if (carbsG < 80) carbsG = 80;
+      note = 'You\'re in a lean bulk — a small surplus of ~250 kcal to maximise muscle gain while minimising fat gain. Aim to gain 0.25–0.5% of bodyweight per month. If you\'re not gaining after 3 weeks, add 100–150 kcal from carbs.';
+      headline = 'Your muscle gain targets';
+    }
+
+    // Recalculate total cals from macros (for accurate bar)
+    const totalCalFromMacros = proteinG * 4 + carbsG * 4 + fatG * 9;
+    const pPct = Math.round((proteinG * 4 / totalCalFromMacros) * 100);
+    const cPct = Math.round((carbsG   * 4 / totalCalFromMacros) * 100);
+    const fPct = 100 - pPct - cPct;
+
+    // Update UI
+    document.getElementById('results-headline').textContent  = headline;
+    document.getElementById('result-calories').textContent   = calories.toLocaleString();
+    document.getElementById('result-protein').textContent    = proteinG;
+    document.getElementById('result-carbs').textContent      = carbsG;
+    document.getElementById('result-fat').textContent        = fatG;
+    document.getElementById('result-note').textContent       = note;
+
+    document.getElementById('bar-protein').style.width = pPct + '%';
+    document.getElementById('bar-carbs').style.width   = cPct + '%';
+    document.getElementById('bar-fat').style.width     = fPct + '%';
+
+    document.getElementById('bar-protein-pct').textContent = `Protein ${pPct}%`;
+    document.getElementById('bar-carbs-pct').textContent   = `Carbs ${cPct}%`;
+    document.getElementById('bar-fat-pct').textContent     = `Fat ${fPct}%`;
+
+    // Show & scroll
+    const resultsEl = document.getElementById('results');
+    resultsEl.style.display = 'block';
+    setTimeout(() => resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  }
+</script>
+</body>
+</html>
