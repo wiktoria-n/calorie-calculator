@@ -404,6 +404,90 @@
 
     .cta-link:hover { background: #a93226; }
 
+    /* ── Email capture ── */
+    .email-box {
+      border: 2px solid var(--green);
+      border-radius: 12px;
+      padding: 28px 24px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .email-box .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+
+    .email-box h3 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 22px;
+      color: var(--dark);
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .email-box p {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 18px;
+      line-height: 1.6;
+    }
+
+    .email-form {
+      display: flex;
+      gap: 8px;
+    }
+
+    @media (max-width: 480px) {
+      .email-form { flex-direction: column; }
+    }
+
+    .email-form input[type="email"] {
+      flex: 1;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--dark);
+      background: #fff;
+    }
+
+    .email-form input[type="email"]:focus {
+      outline: none;
+      border-color: var(--green);
+    }
+
+    .email-btn {
+      padding: 12px 24px;
+      background: var(--green);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+
+    .email-btn:hover { background: #145c39; }
+    .email-btn:disabled { opacity: 0.6; cursor: default; }
+
+    .email-status {
+      font-size: 13px;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
+    .email-status.success { color: var(--green); }
+    .email-status.error { color: var(--red); }
+
     /* ── Footer ── */
     .footer {
       margin-top: 48px;
@@ -574,6 +658,25 @@
 
       <div class="note-box" id="result-note"></div>
 
+      <div class="email-box">
+        <div class="eyebrow">Save these numbers</div>
+        <h3>Get your results emailed to you</h3>
+        <p>Enter your email and I'll send you a copy of your calorie and macro targets, plus the occasional tip on hitting them.</p>
+        <form id="email-form">
+          <div class="email-form">
+            <input type="email" id="email-input" name="email" placeholder="you@example.com" required />
+            <button type="submit" class="email-btn" id="email-submit-btn">Send My Results</button>
+          </div>
+          <input type="hidden" name="calorie_target" id="email-calories" />
+          <input type="hidden" name="protein_g" id="email-protein" />
+          <input type="hidden" name="carbs_g" id="email-carbs" />
+          <input type="hidden" name="fat_g" id="email-fat" />
+          <input type="hidden" name="goal" id="email-goal" />
+          <input type="hidden" name="_subject" value="Your macro calculator results" />
+        </form>
+        <div class="email-status" id="email-status"></div>
+      </div>
+
       <div class="cta-box">
         <div class="eyebrow">Want more tips?</div>
         <h3>Follow along for weekly nutrition and fat loss tips</h3>
@@ -701,11 +804,54 @@
     document.getElementById('bar-carbs-pct').textContent   = `Carbs ${cPct}%`;
     document.getElementById('bar-fat-pct').textContent     = `Fat ${fPct}%`;
 
+    // Stash results for the email capture form
+    document.getElementById('email-calories').value = calories;
+    document.getElementById('email-protein').value  = proteinG;
+    document.getElementById('email-carbs').value    = carbsG;
+    document.getElementById('email-fat').value      = fatG;
+    document.getElementById('email-goal').value     = goal;
+
     // Show & scroll
     const resultsEl = document.getElementById('results');
     resultsEl.style.display = 'block';
     setTimeout(() => resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
   }
+
+  document.getElementById('email-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const form = e.target;
+    const btn = document.getElementById('email-submit-btn');
+    const statusEl = document.getElementById('email-status');
+
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    statusEl.textContent = '';
+    statusEl.className = 'email-status';
+
+    fetch('https://formspree.io/f/xqpzgbrn', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+      body: new FormData(form)
+    })
+      .then((response) => {
+        if (response.ok) {
+          statusEl.textContent = "Done — check your inbox for your results!";
+          statusEl.className = 'email-status success';
+          form.reset();
+        } else {
+          statusEl.textContent = 'Something went wrong. Please try again.';
+          statusEl.className = 'email-status error';
+        }
+      })
+      .catch(() => {
+        statusEl.textContent = 'Something went wrong. Please try again.';
+        statusEl.className = 'email-status error';
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.textContent = 'Send My Results';
+      });
+  });
 </script>
 </body>
 </html>
