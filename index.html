@@ -777,12 +777,17 @@
     let headline = '';
 
     if (goal === 'cut') {
-      calories  = Math.round(tdee - 400);
+      const minCalories = gender === 'female' ? 1200 : 1500; // generally accepted bare-minimum safe intake
+      calories  = Math.max(Math.round(tdee - 400), minCalories);
       proteinG  = Math.round(weightKg * 2.2);  // 2.2g/kg — high protein for fat loss
       fatG      = Math.round(weightKg * 0.9);   // ~1g/kg
       carbsG    = Math.round((calories - proteinG * 4 - fatG * 9) / 4);
       if (carbsG < 50) carbsG = 50; // floor
-      note = 'You\'re in a moderate calorie deficit of ~400 kcal. Protein is set high to protect muscle while you lose fat. Aim to lose 0.5–1% of bodyweight per week — if progress stalls after 2 weeks, reduce calories by another 100–150 kcal.';
+      if (calories === minCalories && calories > tdee - 400) {
+        note = `Your calculated deficit would fall below ${minCalories} kcal, which is considered too low to safely meet nutritional needs, so your target has been set to the ${minCalories} kcal minimum instead. Protein is set high to protect muscle while you lose fat. Because this is a smaller deficit than usual, weight loss will be slower — consider pairing this with more daily activity, and check in with a doctor or dietitian before going any lower.`;
+      } else {
+        note = 'You\'re in a moderate calorie deficit of ~400 kcal. Protein is set high to protect muscle while you lose fat. Aim to lose 0.5–1% of bodyweight per week — if progress stalls after 2 weeks, reduce calories by another 100–150 kcal.';
+      }
       headline = 'Your fat loss targets';
     } else if (goal === 'maintain') {
       calories  = Math.round(tdee);
