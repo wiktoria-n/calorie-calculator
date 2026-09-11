@@ -345,6 +345,23 @@
     .seg-carbs   { background: #e67e22; }
     .seg-fat     { background: var(--green); }
 
+    /* ── Maintenance callout ── */
+    .maintenance-box {
+      background: #f7f7f7;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .maintenance-box strong {
+      color: var(--dark);
+    }
+
     /* ── Note ── */
     .note-box {
       background: var(--green-bg);
@@ -625,6 +642,11 @@
         <div class="sub">kcal per day</div>
       </div>
 
+      <div class="maintenance-box" id="maintenance-box" style="display: none;">
+        Your estimated <strong>maintenance calories</strong> (what keeps your current weight stable) are
+        <strong id="maintenance-calories">—</strong> kcal/day.
+      </div>
+
       <div class="macros-grid">
         <div class="macro-card protein">
           <div class="macro-label">Protein</div>
@@ -793,6 +815,14 @@
     document.getElementById('result-carbs').textContent      = carbsG;
     document.getElementById('result-fat').textContent        = fatG;
     document.getElementById('result-note').textContent       = note;
+
+    const maintenanceBox = document.getElementById('maintenance-box');
+    if (goal === 'maintain') {
+      maintenanceBox.style.display = 'none';
+    } else {
+      document.getElementById('maintenance-calories').textContent = Math.round(tdee).toLocaleString();
+      maintenanceBox.style.display = 'block';
+    }
 
     document.getElementById('bar-protein').style.width = pPct + '%';
     document.getElementById('bar-carbs').style.width   = cPct + '%';
