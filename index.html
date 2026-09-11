@@ -588,12 +588,12 @@
         </div>
       </div>
       <div class="field" style="grid-column: 1 / -1;">
-        <label for="target-weight-kg">Target Weight <span style="font-weight: 400; color: var(--muted);">(optional)</span></label>
+        <label for="target-weight-kg">Target Weight</label>
         <div class="input-with-unit">
           <input type="number" id="target-weight-kg" placeholder="58" min="30" max="300" />
           <span class="input-unit">kg</span>
         </div>
-        <div class="hint">Tell us your goal weight and we'll work out how much you need to lose or gain.</div>
+        <div class="hint">The weight you're aiming for — we'll work out how much you need to lose or gain.</div>
       </div>
     </div>
 
@@ -619,12 +619,12 @@
         </div>
       </div>
       <div class="field" style="grid-column: 1 / -1;">
-        <label for="target-weight-lbs">Target Weight <span style="font-weight: 400; color: var(--muted);">(optional)</span></label>
+        <label for="target-weight-lbs">Target Weight</label>
         <div class="input-with-unit">
           <input type="number" id="target-weight-lbs" placeholder="128" min="66" max="660" />
           <span class="input-unit">lbs</span>
         </div>
-        <div class="hint">Tell us your goal weight and we'll work out how much you need to lose or gain.</div>
+        <div class="hint">The weight you're aiming for — we'll work out how much you need to lose or gain.</div>
       </div>
     </div>
   </div>
@@ -769,7 +769,7 @@
     return lbs / 2.2046;
   }
 
-  // Returns null when left blank — target weight is optional
+  // Returns null when left blank or invalid; calculate() requires a valid value before proceeding
   function getTargetWeightKg() {
     if (currentUnits === 'metric') {
       const kg = parseFloat(document.getElementById('target-weight-kg').value);
@@ -798,17 +798,14 @@
     const targetWeightKg = getTargetWeightKg(); // null if left blank
 
     // Validate
-    if (!age || !weightKg || !heightCm || isNaN(age) || isNaN(weightKg) || isNaN(heightCm)) {
-      alert('Please fill in all fields before calculating.');
+    if (!age || !weightKg || !heightCm || !targetWeightKg || isNaN(age) || isNaN(weightKg) || isNaN(heightCm) || isNaN(targetWeightKg)) {
+      alert('Please fill in all fields before calculating, including your target weight.');
       return;
     }
     if (age < 16 || age > 80)     { alert('Please enter an age between 16 and 80.'); return; }
     if (weightKg < 30 || weightKg > 300) { alert('Please enter a valid weight.'); return; }
     if (heightCm < 100 || heightCm > 250) { alert('Please enter a valid height.'); return; }
-    if (targetWeightKg !== null && (targetWeightKg < 30 || targetWeightKg > 300)) {
-      alert('Please enter a valid target weight.');
-      return;
-    }
+    if (targetWeightKg < 30 || targetWeightKg > 300) { alert('Please enter a valid target weight.'); return; }
 
     // BMR — Mifflin-St Jeor
     let bmr;
@@ -857,39 +854,35 @@
       headline = 'Your muscle gain targets';
     }
 
-    // Weight goal summary (only when a target weight was entered)
+    // Weight goal summary
     const weightGoalBox = document.getElementById('weight-goal-box');
-    if (targetWeightKg === null) {
-      weightGoalBox.style.display = 'none';
+    const toKgToDisplay = (kg) => currentUnits === 'metric'
+      ? `${Math.round(kg * 10) / 10} kg`
+      : `${Math.round(kg * 2.2046 * 10) / 10} lbs`;
+
+    const diffKg = weightKg - targetWeightKg; // positive = needs to lose, negative = needs to gain
+
+    let goalText;
+    if (Math.abs(diffKg) < 0.5) {
+      goalText = `You're already close to your target weight of <strong>${toKgToDisplay(targetWeightKg)}</strong> — these targets will help you hold steady there.`;
     } else {
-      const toKgToDisplay = (kg) => currentUnits === 'metric'
-        ? `${Math.round(kg * 10) / 10} kg`
-        : `${Math.round(kg * 2.2046 * 10) / 10} lbs`;
+      const verb = diffKg > 0 ? 'lose' : 'gain';
+      const amountText = toKgToDisplay(Math.abs(diffKg));
+      goalText = `Your goal is to <strong>${verb} ${amountText}</strong> — from ${toKgToDisplay(weightKg)} to ${toKgToDisplay(targetWeightKg)}.`;
 
-      const diffKg = weightKg - targetWeightKg; // positive = needs to lose, negative = needs to gain
-
-      let goalText;
-      if (Math.abs(diffKg) < 0.5) {
-        goalText = `You're already close to your target weight of <strong>${toKgToDisplay(targetWeightKg)}</strong> — these targets will help you hold steady there.`;
-      } else {
-        const verb = diffKg > 0 ? 'lose' : 'gain';
-        const amountText = toKgToDisplay(Math.abs(diffKg));
-        goalText = `Your goal is to <strong>${verb} ${amountText}</strong> — from ${toKgToDisplay(weightKg)} to ${toKgToDisplay(targetWeightKg)}.`;
-
-        // Rough timeline, only when the calorie target actually moves you in that direction
-        const goalMatchesDirection = (goal === 'cut' && diffKg > 0) || (goal === 'build' && diffKg < 0);
-        const weeklyDeficitKcal = Math.abs(calories - tdee) * 7;
-        if (goalMatchesDirection && weeklyDeficitKcal > 0) {
-          const estWeeks = Math.round((Math.abs(diffKg) * 7700) / weeklyDeficitKcal);
-          if (estWeeks > 0) {
-            goalText += ` At your current calorie target, that's roughly <strong>${estWeeks} week${estWeeks === 1 ? '' : 's'}</strong>.`;
-          }
+      // Rough timeline, only when the calorie target actually moves you in that direction
+      const goalMatchesDirection = (goal === 'cut' && diffKg > 0) || (goal === 'build' && diffKg < 0);
+      const weeklyDeficitKcal = Math.abs(calories - tdee) * 7;
+      if (goalMatchesDirection && weeklyDeficitKcal > 0) {
+        const estWeeks = Math.round((Math.abs(diffKg) * 7700) / weeklyDeficitKcal);
+        if (estWeeks > 0) {
+          goalText += ` At your current calorie target, that's roughly <strong>${estWeeks} week${estWeeks === 1 ? '' : 's'}</strong>.`;
         }
       }
-
-      weightGoalBox.innerHTML = goalText;
-      weightGoalBox.style.display = 'block';
     }
+
+    weightGoalBox.innerHTML = goalText;
+    weightGoalBox.style.display = 'block';
 
     // Recalculate total cals from macros (for accurate bar)
     const totalCalFromMacros = proteinG * 4 + carbsG * 4 + fatG * 9;
